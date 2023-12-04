@@ -65,14 +65,14 @@ class Board():
 
             moves.update(self.traverseLeft(
                 row - 1, max(row-3, -1), -1, piece.color, left))
-            moves.update(self.traverseRight(
-                row - 1, max(row-3, -1), -1, piece.color, right))
+            # moves.update(self.traverseRight(
+            #     row - 1, max(row-3, -1), -1, piece.color, right))
 
         if piece.color == BLACK or piece.isKing:
             moves.update(self.traverseLeft(
                 row + 1, min(row+3, ROWS), 1, piece.color, left))
-            moves.update(self.traverseRight(
-                row + 1, min(row+3, ROWS), 1, piece.color, right))
+            # moves.update(self.traverseRight(
+            #     row + 1, min(row+3, ROWS), 1, piece.color, right))
 
         # If any move captures then remove all the ones that don't.
         return self.filterMovesIfCaptureAvailable(moves)
@@ -85,9 +85,16 @@ class Board():
                 break
 
             current = self.getPiece(r, left)
+            print("")
             print(f"Current: {current}")
-            print(f"Last: {[print(element) for element in last]}")
-            print(f"Captured: {[print(element) for element in captured]}")
+            print("")
+            print(f"Last: ")
+            for element in last:
+                print(element)
+            print("")
+            print(f"Captured: ")
+            for element in captured:
+                print(element)
             print("\n\n")
             if current == 0:
                 if captured and not last:
@@ -104,8 +111,8 @@ class Board():
                         row = min(r+3, ROWS)
                     moves.update(self.traverseLeft(
                         r+step, row, step, color, left - 1, captured=last))
-                    moves.update(self.traverseRight(
-                        r+step, row, step, color, left + 1, captured=last))
+                    # moves.update(self.traverseRight(
+                    #     r+step, row, step, color, left + 1, captured=last))
 
                 break
             elif current.color == color:
