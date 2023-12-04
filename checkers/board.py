@@ -31,13 +31,11 @@ class Board():
                 #         self.board[row].append(0)
                 # else:
                 #     self.board[row].append(0)
-
-        # self.board[5][4] = Piece(self.win, 5, 4, BLACK)
-        # self.board[3][6] = Piece(self.win, 3, 6, BLACK)
-        # self.board[1][4] = Piece(self.win, 1, 4, BLACK)
-        # self.board[5][2] = Piece(self.win, 5, 2, BLACK)
-        # self.board[3][2] = Piece(self.win, 3, 2, BLACK)
         self.board[1][2] = Piece(self.win, 1, 2, BLACK)
+        self.board[1][4] = Piece(self.win, 1, 4, BLACK)
+        self.board[3][2] = Piece(self.win, 3, 2, BLACK)
+        self.board[3][4] = Piece(self.win, 3, 4, BLACK)
+
         self.board[0][3] = Piece(self.win, 0, 3, WHITE)
         self.board[0][3].makeKing()
 
@@ -65,17 +63,22 @@ class Board():
 
             moves.update(self.traverseLeft(
                 row - 1, max(row-3, -1), -1, piece.color, left))
-            # moves.update(self.traverseRight(
-            #     row - 1, max(row-3, -1), -1, piece.color, right))
+            moves.update(self.traverseRight(
+                row - 1, max(row-3, -1), -1, piece.color, right))
 
         if piece.color == BLACK or piece.isKing:
             moves.update(self.traverseLeft(
                 row + 1, min(row+3, ROWS), 1, piece.color, left))
-            # moves.update(self.traverseRight(
-            #     row + 1, min(row+3, ROWS), 1, piece.color, right))
+            moves.update(self.traverseRight(
+                row + 1, min(row+3, ROWS), 1, piece.color, right))
 
         # If any move captures then remove all the ones that don't.
-        return self.filterMovesIfCaptureAvailable(moves)
+        moves = self.filterMovesIfCaptureAvailable(moves)
+
+        # # Remove partial routes
+        # moves = self.filterOutPartialMoves(moves)
+
+        return moves
 
     def traverseLeft(self, start: int, stop: int, step: int, color: tuple, left: int, captured=[]):
         moves = {}
@@ -85,17 +88,17 @@ class Board():
                 break
 
             current = self.getPiece(r, left)
-            print("")
-            print(f"Current: {current}")
-            print("")
-            print(f"Last: ")
+            print(f"Looking at: ({r},{left})")
+            print(f"Current:")
+            print(current)
+            print("Last:")
             for element in last:
                 print(element)
-            print("")
-            print(f"Captured: ")
+            print("Captured: ")
             for element in captured:
                 print(element)
-            print("\n\n")
+
+            print("\n-------------\n")
             if current == 0:
                 if captured and not last:
                     break
@@ -110,9 +113,9 @@ class Board():
                     else:
                         row = min(r+3, ROWS)
                     moves.update(self.traverseLeft(
-                        r+step, row, step, color, left - 1, captured=last))
-                    # moves.update(self.traverseRight(
-                    #     r+step, row, step, color, left + 1, captured=last))
+                        r+step, row, step, color, left - 1, captured=last + captured))
+                    moves.update(self.traverseRight(
+                        r+step, row, step, color, left + 1, captured=last + captured))
 
                 break
             elif current.color == color:
@@ -132,10 +135,17 @@ class Board():
                 break
 
             current = self.getPiece(r, right)
-            print(f"Current: {current}")
-            print(f"Last: {[print(element) for element in last]}")
-            print(f"Captured: {[print(element) for element in captured]}")
-            print("\n\n")
+            print(f"Looking at: ({r},{right})")
+            print(f"Current:")
+            print(current)
+            print("Last:")
+            for element in last:
+                print(element)
+            print("Captured: ")
+            for element in captured:
+                print(element)
+
+            print("\n-------------\n")
 
             if current == 0:
                 if captured and not last:
@@ -151,9 +161,9 @@ class Board():
                     else:
                         row = min(r+3, ROWS)
                     moves.update(self.traverseLeft(
-                        r+step, row, step, color, right - 1, captured=last))
+                        r+step, row, step, color, right - 1, captured=last + captured))
                     moves.update(self.traverseRight(
-                        r+step, row, step, color, right + 1, captured=last))
+                        r+step, row, step, color, right + 1, captured=last + captured))
                 break
             elif current.color == color:
                 break
@@ -172,6 +182,17 @@ class Board():
         else:
             # If no list has items, return the original dictionary
             return moves
+
+    def filterOutPartialMoves(self, moves):
+        def is_value_contained(main_value, other_values):
+            for value in other_values:
+                if main_value != value and all(item in value for item in main_value):
+                    return True
+            return False
+
+        filtered_data = {key: value for key, value in moves.items(
+        ) if not is_value_contained(value, moves.values())}
+        return filtered_data
 
     def draw(self):
         self.draw_squares()

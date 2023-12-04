@@ -1,24 +1,46 @@
-def filter_routes(test):
-    # Convert the list of strings to a set of frozensets for comparison
-    route_sets = {key: frozenset(value) for key, value in test.items()}
-
-    # Find the unique routes (not a subset of any other route)
-    unique_routes = {key: list(value) for key, value in route_sets.items()
-                     if not any(value < other_value for other_key, other_value in route_sets.items() if other_key != key)}
-
-    return unique_routes
-
-
-test = {
-    (2, 1): ["Color: Black, Row: 1, Col: 2"],
-    (4, 3): ["Color: Black, Row: 3, Col: 2", "Color: Black, Row: 1, Col: 2"],
-    (6, 1): ["Color: Black, Row: 5, Col: 2", "Color: Black, Row: 3, Col: 2", "Color: Black, Row: 1, Col: 2"],
-    (6, 5): ["Color: Black, Row: 5, Col: 4", "Color: Black, Row: 3, Col: 2", "Color: Black, Row: 1, Col: 2"],
-    (2, 5): ["Color: Black, Row: 1, Col: 4"],
-    (4, 7): ["Color: Black, Row: 3, Col: 6", "Color: Black, Row: 1, Col: 4"]
+# Original data
+data = {
+    (2, 5): ["Color: Black, Row: 1, Col: 6"],
+    (4, 3): ["Color: Black, Row: 3, Col: 4", "Color: Black, Row: 1, Col: 6"],
+    (6, 1): ["Color: Black, Row: 5, Col: 2", "Color: Black, Row: 3, Col: 4", "Color: Black, Row: 1, Col: 6"],
+    (6, 5): ["Color: Black, Row: 5, Col: 4", "Color: Black, Row: 3, Col: 4", "Color: Black, Row: 1, Col: 6"],
 }
 
-filtered_test = filter_routes(test)
+# Function to check if a value is contained within another value
 
-for key, value in filtered_test.items():
-    print(f"{key}: {value}")
+
+def is_value_contained(main_value, other_values):
+    for value in other_values:
+        if main_value != value and all(item in value for item in main_value):
+            return True
+    return False
+
+
+# Filtering the data to only include key-value pairs where the value is not contained within another value
+filtered_data = {key: value for key, value in data.items(
+) if not is_value_contained(value, data.values())}
+
+for data in filtered_data:
+    print(f"{data}: {filtered_data[data]}")
+
+
+"""
+Can I save the move in a structure like 
+Move1 = {final_square: (3,4),
+        partial_squares: [(2,1)],
+        captured_pieces: [Piece(), Piece()]}
+        
+Move2 = {final_square: (3,4),
+        partial_squares: [(2,5)],
+        captured_pieces: [Piece(), Piece()]}
+        
+moves = [
+    Move1
+    Move2
+]
+
+check if selected squre is in move[0].partial_squares or move[0].final_square o rmove[1].partial_squares or move[1].final_square
+
+if its in a certain move set 
+
+"""
