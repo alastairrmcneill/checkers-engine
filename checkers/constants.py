@@ -17,7 +17,8 @@ BLACK: tuple = (54, 54, 54)
 BOARDDARK: tuple = (124, 149, 93)
 BOARDLIGHT: tuple = (238, 238, 213)
 RED: tuple = (255, 0, 0)
-GREY: tuple = (128, 128, 128)
+LIGHTGREY: tuple = (200, 200, 200)
+DARKGREY: tuple = (128, 128, 128)
 
 # Assets
 CROWN: pygame.Surface = pygame.transform.scale(
