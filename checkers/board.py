@@ -32,9 +32,10 @@ class Board():
                 # else:
                 #     self.board[row].append(0)
         self.board[1][2] = Piece(self.win, 1, 2, BLACK)
-        # self.board[1][4] = Piece(self.win, 1, 4, BLACK)
+        self.board[1][4] = Piece(self.win, 1, 4, BLACK)
         self.board[3][2] = Piece(self.win, 3, 2, BLACK)
-        # self.board[3][4] = Piece(self.win, 3, 4, BLACK)
+        self.board[3][4] = Piece(self.win, 3, 4, BLACK)
+        self.board[5][4] = Piece(self.win, 5, 4, BLACK)
 
         self.board[0][3] = Piece(self.win, 0, 3, WHITE)
         self.board[0][3].makeKing()
