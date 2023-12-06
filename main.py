@@ -22,6 +22,9 @@ def main():
     while run:
         clock.tick(30)
 
+        if (game.isWinner() != None):
+            print("Game is over")
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False

@@ -27,10 +27,23 @@ class Game():
 
             if piece != 0 and piece.color == self.turn:
                 self.selected = piece
-                # self.printValidMoves()
                 return True
 
         return False
+
+    def numberOfValidMoves(self):
+        counter = 0
+        for pieceMove in self.validMoves:
+            counter += len(pieceMove["moves"])
+        return counter
+
+    def isWinner(self):
+        if self.numberOfValidMoves() == 0:
+            if self.turn == WHITE:
+                return BLACK
+            else:
+                return WHITE
+        return self.board.isWinner()
 
     def printValidMoves(self):
         for pieceMoves in self.validMoves:
@@ -46,18 +59,13 @@ class Game():
 
     def move(self, row: int, col: int):
         piece = self.board.getPiece(row, col)
-        print(f"Selected: {self.selected}")
-        print(f"New Piece: {piece}")
-
         move = (row, col)
         if self.selected and piece == 0:
             if self.isPieceAllowedToMove():
-                print("Piece can move")
                 if (self.isFinalMove(move)):
                     # Check if its a final move
                     captures = self.getCapturedPiecesFromMove(move)
-                    print(captures)
-                    self.board.move(self.selected, row, col)
+                    self.board.move(self.selected, row, col, captures)
                     self.validMoves = {}
                     self.changeTurns()
                     self.selected = None
@@ -65,9 +73,9 @@ class Game():
                     return True
                 elif (self.isPartialMove(move)):
                     # Check if its a partial move
+
                     captures = self.getCapturedPiecesFromMove(move)
-                    print(captures)
-                    self.board.move(self.selected, row, col)
+                    self.board.move(self.selected, row, col, captures)
                     self.removeInvalidRoutes(move)
                     self.jumping = True
                     return True
@@ -78,19 +86,21 @@ class Game():
                 # self.selected = None
                 # return True
         else:
-            print("Piece not allowed to move")
             return False
 
     def getCapturedPiecesFromMove(self, move):
         if (self.isFinalMove(move)):
             for pieceMove in self.validMoves:
                 if pieceMove["piece"] == self.selected:
-                    return pieceMove["captures"]
+                    for possibleMoves in pieceMove["moves"]:
+                        if move == possibleMoves["position"]:
+                            return possibleMoves["captures"]
         else:
             for pieceMove in self.validMoves:
                 if pieceMove["piece"] == self.selected:
-                    if move == pieceMove["partialRoute"][0]:
-                        return [pieceMove["captures"][0]]
+                    for possibleMoves in pieceMove["moves"]:
+                        if move == possibleMoves["partialRoute"][0]:
+                            return [possibleMoves["captures"][0]]
 
     def isPieceAllowedToMove(self):
         for pieceMove in self.validMoves:
@@ -101,7 +111,6 @@ class Game():
     def isPartialMove(self, move):
         for pieceMove in self.validMoves:
             if (self.selected == pieceMove["piece"]):
-                print("Selected piece")
                 for possibleMove in pieceMove["moves"]:
                     if move == possibleMove["partialRoute"][0]:
                         return True
@@ -126,6 +135,7 @@ class Game():
                     new_partial_route = [
                         m for m in move_entry['partialRoute'] if m != move]
                     move_entry['partialRoute'] = new_partial_route
+                    move_entry["captures"].pop(0)
                     new_moves.append(move_entry)
             if new_moves:
                 # Only add items that contain the move in their partialRoute

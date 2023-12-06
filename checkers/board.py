@@ -18,40 +18,45 @@ class Board():
         for row in range(ROWS):
             self.board.append([])
             for col in range(COLS):
-                self.board[row].append(0)
+                if col % 2 == ((row + 1) % 2):
+                    if row < 3:
+                        print(row, col)
+                        self.board[row].append(
+                            Piece(self.win, row, col, BLACK))
+                    elif row > 4:
+                        print(row, col)
+                        self.board[row].append(
+                            Piece(self.win, row, col, WHITE))
+                    else:
+                        self.board[row].append(0)
+                else:
+                    self.board[row].append(0)
 
-                # if col % 2 == ((row + 1) % 2):
-                #     if row < 3:
-                #         self.board[row].append(
-                #             Piece(self.win, row, col, BLACK))
-                #     elif row > 4:
-                #         self.board[row].append(
-                #             Piece(self.win, row, col, WHITE))
-                #     else:
-                #         self.board[row].append(0)
-                # else:
-                #     self.board[row].append(0)
-        self.board[1][2] = Piece(self.win, 1, 2, BLACK)
-        self.board[1][4] = Piece(self.win, 1, 4, BLACK)
-        self.board[3][2] = Piece(self.win, 3, 2, BLACK)
-        self.board[3][4] = Piece(self.win, 3, 4, BLACK)
-        self.board[5][4] = Piece(self.win, 5, 4, BLACK)
-
-        self.board[0][3] = Piece(self.win, 0, 3, WHITE)
-        self.board[0][3].makeKing()
-        self.board[0][7] = Piece(self.win, 0, 7, WHITE)
-        self.board[0][7].makeKing()
-
-    def move(self, piece: Piece, row: int, col: int):
+    def move(self, piece: Piece, row: int, col: int, captures: list[Piece]):
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         piece.move(row, col)
-
-        if row == ROWS - 1 or row == 0:
+        for capturedPiece in captures:
+            self.board[capturedPiece.row][capturedPiece.col] = 0
+            if capturedPiece != 0:
+                if capturedPiece.color == BLACK:
+                    self.blackPieces -= 1
+                else:
+                    self.whitePieces -= 1
+        print(f"Black pieces: ${self.blackPieces}")
+        print(f"White pieces: ${self.whitePieces}")
+        if (row == ROWS - 1) or (row == 0):
             piece.makeKing()
             if piece.color == WHITE:
                 self.whiteKings += 1
             else:
                 self.blackKings += 1
+
+    def isWinner(self):
+        if self.blackPieces <= 0:
+            return WHITE
+        elif self.whitePieces <= 0:
+            return BLACK
+        return None
 
     def getPiece(self, row: int, col: int) -> Piece or int:
         return self.board[row][col]
@@ -121,7 +126,7 @@ class Board():
                     break
                 elif captured:
                     moves.append(
-                        {"position": (r, left), "captures": last + captured, "partialRoute": partialRoute + [(r, left)]})
+                        {"position": (r, left), "captures": captured + last, "partialRoute": partialRoute + [(r, left)]})
                 else:
                     moves.append({"position": (r, left), "captures": last,
                                  "partialRoute": partialRoute + [(r, left)]})
@@ -132,9 +137,9 @@ class Board():
                     else:
                         row = min(r+3, ROWS)
                     moves.extend(self.traverseLeft(
-                        r+step, row, step, color, left - 1, captured=last + captured, partialRoute=partialRoute + [(r, left)]))
+                        r+step, row, step, color, left - 1, captured=captured + last, partialRoute=partialRoute + [(r, left)]))
                     moves.extend(self.traverseRight(
-                        r+step, row, step, color, left + 1, captured=last + captured, partialRoute=partialRoute + [(r, left)]))
+                        r+step, row, step, color, left + 1, captured=captured + last, partialRoute=partialRoute + [(r, left)]))
 
                 break
             elif current.color == color:
@@ -171,7 +176,7 @@ class Board():
                     break
                 elif captured:
                     moves.append(
-                        {"position": (r, right), "captures": last + captured, "partialRoute": partialRoute + [(r, right)]})
+                        {"position": (r, right), "captures": captured + last, "partialRoute": partialRoute + [(r, right)]})
                 else:
                     moves.append({"position": (r, right), "captures": last,
                                  "partialRoute": partialRoute + [(r, right)]})
@@ -182,9 +187,9 @@ class Board():
                     else:
                         row = min(r+3, ROWS)
                     moves.extend(self.traverseLeft(
-                        r+step, row, step, color, right - 1, captured=last + captured, partialRoute=partialRoute + [(r, right)]))
+                        r+step, row, step, color, right - 1, captured=captured + last, partialRoute=partialRoute + [(r, right)]))
                     moves.extend(self.traverseRight(
-                        r+step, row, step, color, right + 1, captured=last + captured, partialRoute=partialRoute + [(r, right)]))
+                        r+step, row, step, color, right + 1, captured=captured + last, partialRoute=partialRoute + [(r, right)]))
                 break
             elif current.color == color:
                 break
