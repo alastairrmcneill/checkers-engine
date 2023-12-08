@@ -47,8 +47,6 @@ class Game():
                 return BLACK
             else:
                 return WHITE
-        print(f"Number of moves: {len(self.board.history)}")
-        print(f"Moves since last capture: ")
         return self.board.isWinner()
 
     def printValidMoves(self):

@@ -33,16 +33,17 @@ def main():
             quit()
 
         if game.turn == WHITE:
-            value, new_board = engine1.minimax(game, game.board, False, 4)
+            value, new_board = engine1.minimax(game, game.board, False, 3)
             game.aiMove(new_board)
-            print(f"Num since last capture: {game.board.check40MoveRule()[1]}")
+
+            print(f"Num white kings: {game.board.whiteKings}")
             game.draw()
             pygame.time.delay(200)
 
         if game.turn == BLACK:
-            value, new_board = engine2.minimax(game, game.board, True, 4)
+            value, new_board = engine2.minimax(game, game.board, True, 3)
             game.aiMove(new_board)
-            print(f"Num since last capture: {game.board.check40MoveRule()[1]}")
+            print(f"Num black kings: {game.board.blackKings}")
             game.draw()
             pygame.time.delay(200)
 
