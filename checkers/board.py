@@ -5,10 +5,10 @@ from checkers.piece import Piece
 
 
 class Board():
-    def __init__(self, win: pygame.Surface) -> None:
-        self.win: pygame.Surface = win
+    def __init__(self) -> None:
         self.board: list[list[Piece]] = []
         self.create_board()
+        self.history: list[list[list[Piece]]] = []
         self.whiteKings: int = 0
         self.blackKings: int = 0
         self.whitePieces: int = 12
@@ -20,20 +20,38 @@ class Board():
             for col in range(COLS):
                 if col % 2 == ((row + 1) % 2):
                     if row < 3:
-                        print(row, col)
                         self.board[row].append(
-                            Piece(self.win, row, col, BLACK))
+                            Piece(row, col, BLACK))
                     elif row > 4:
-                        print(row, col)
                         self.board[row].append(
-                            Piece(self.win, row, col, WHITE))
+                            Piece(row, col, WHITE))
                     else:
                         self.board[row].append(0)
                 else:
                     self.board[row].append(0)
 
+    def convertBoardToList(self):
+        convertedBoard = []
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.getPiece(row, col)
+                if piece == 0:
+                    convertedBoard.append(0)
+                elif piece.color == WHITE:
+                    if piece.isKing:
+                        convertedBoard.append(10)
+                    convertedBoard.append(1)
+                elif piece.color == BLACK:
+                    convertedBoard.append(2)
+                    if piece.isKing:
+                        convertedBoard.append(20)
+
+        return convertedBoard
+
     def move(self, piece: Piece, row: int, col: int, captures: list[Piece]):
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
+        self.addToHistory()
+        self.isWinner()
         piece.move(row, col)
         for capturedPiece in captures:
             self.board[capturedPiece.row][capturedPiece.col] = 0
@@ -42,20 +60,53 @@ class Board():
                     self.blackPieces -= 1
                 else:
                     self.whitePieces -= 1
-        print(f"Black pieces: ${self.blackPieces}")
-        print(f"White pieces: ${self.whitePieces}")
         if (row == ROWS - 1) or (row == 0):
-            piece.makeKing()
-            if piece.color == WHITE:
-                self.whiteKings += 1
-            else:
-                self.blackKings += 1
+            if not piece.isKing:
+                piece.makeKing()
+                if piece.color == WHITE:
+                    self.whiteKings += 1
+                else:
+                    self.blackKings += 1
+
+    def aiMove(self, board: list[list[Piece]]):
+        self.board = board
+        self.addToHistory()
+
+    def addToHistory(self):
+        self.history.append(self.convertBoardToList())
+
+    def checkThreePeat(self):
+        if len(self.history) > 0:
+            target_sublist = self.history[-1]
+            count = sum(sublist == target_sublist for sublist in self.history)
+            if count >= 3:
+                return True
+
+        return False
+
+        count = sum(sublist == target_sublist for sublist in data)
+
+    def check40MoveRule(self):
+        sums = [sum(lst) for lst in self.history]
+        unique_sum_index = -1
+
+        for i, current_sum in enumerate(sums):
+            if all(current_sum != previous_sum for previous_sum in sums[:i]):
+                unique_sum_index = i
+
+        numberMovesSinceLastCapture = len(self.history) - unique_sum_index
+
+        return numberMovesSinceLastCapture >= 40, numberMovesSinceLastCapture
 
     def isWinner(self):
         if self.blackPieces <= 0:
             return WHITE
         elif self.whitePieces <= 0:
             return BLACK
+
+        if self.checkThreePeat() or self.check40MoveRule()[0]:
+            return "Draw"
+
         return None
 
     def getPiece(self, row: int, col: int) -> Piece or int:
@@ -236,17 +287,20 @@ class Board():
         output = filter_moves(moves)
         return output
 
-    def draw(self):
-        self.draw_squares()
+    def draw(self, win: pygame.Surface):
+        self.draw_squares(win)
         for row in range(ROWS):
             for col in range(COLS):
                 piece = self.board[row][col]
                 if piece != 0:
-                    piece.draw()
+                    piece.draw(win)
 
-    def draw_squares(self):
-        self.win.fill(BOARDDARK)
+    def draw_squares(self, win: pygame.Surface):
+        win.fill(BOARDDARK)
         for row in range(ROWS):
             for col in range(row % 2, COLS, 2):
-                pygame.draw.rect(self.win, BOARDLIGHT, (row*SQUARE_SIZE,
+                pygame.draw.rect(win, BOARDLIGHT, (row*SQUARE_SIZE,
                                  col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+    def __str__(self) -> str:
+        return f"""Black Pieces: {self.blackPieces},White Pieces: {self.whitePieces}"""

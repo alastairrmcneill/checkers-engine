@@ -6,7 +6,7 @@ from checkers.board import Board
 class Game():
     def __init__(self, win: pygame.Surface) -> None:
         self.win: pygame.Surface = win
-        self.board: Board = Board(win)
+        self.board: Board = Board()
         self.turn: tuple = WHITE
         self.selected = None
         self.validMoves: list = []
@@ -37,12 +37,18 @@ class Game():
             counter += len(pieceMove["moves"])
         return counter
 
+    def aiMove(self, board):
+        self.board = board
+        self.changeTurns()
+
     def isWinner(self):
         if self.numberOfValidMoves() == 0:
             if self.turn == WHITE:
                 return BLACK
             else:
                 return WHITE
+        print(f"Number of moves: {len(self.board.history)}")
+        print(f"Moves since last capture: ")
         return self.board.isWinner()
 
     def printValidMoves(self):
@@ -147,7 +153,9 @@ class Game():
             self.turn = BLACK
         else:
             self.turn = WHITE
-
+        # for i in range(len(self.board.history)):
+        #     print(f"Board #{i}")
+        #     print(self.board.history[i])
         self.validMoves = self.board.getValidMoves(self.turn)
 
     def drawValidMoves(self):
@@ -171,7 +179,7 @@ class Game():
         """
         Draws the game to the screen
         """
-        self.board.draw()
+        self.board.draw(self.win)
         self.drawSelected()
         self.drawValidMoves()
         pygame.display.update()

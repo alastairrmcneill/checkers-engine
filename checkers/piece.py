@@ -5,8 +5,7 @@ from checkers.constants import SQUARE_SIZE, CROWN, WHITE
 class Piece():
     PADDING = 12
 
-    def __init__(self, win: pygame.Surface, row: int, col: int, color: tuple) -> None:
-        self.win: pygame.Surface = win
+    def __init__(self, row: int, col: int, color: tuple) -> None:
         self.row: int = row
         self.col: int = col
         self.color: tuple = color
@@ -27,12 +26,12 @@ class Piece():
         self.col = col
         self.calc_pos()
 
-    def draw(self):
+    def draw(self, win: pygame.Surface):
         radius = SQUARE_SIZE//2 - self.PADDING
-        pygame.draw.circle(self.win, self.color, (self.x, self.y), radius)
+        pygame.draw.circle(win, self.color, (self.x, self.y), radius)
         if self.isKing:
-            self.win.blit(CROWN, (self.x - CROWN.get_width() //
-                          2, self.y - CROWN.get_height()//2))
+            win.blit(CROWN, (self.x - CROWN.get_width() //
+                             2, self.y - CROWN.get_height()//2))
 
     def __str__(self) -> str:
         if self.color == WHITE:
