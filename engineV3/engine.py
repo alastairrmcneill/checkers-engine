@@ -28,45 +28,53 @@ class EngineV3:
                                 [0, 1, 0, 1, 0, 1, 0, 0.75],
                                 [0.75, 0, 1, 0, 1, 0, 1, 0]]
 
-    def minimax(self, gameState: Game, board: Board, maximizeAI: bool, depth: int):
+    def minimax(self, gameState: Game, board: Board, maximizeAI: bool, depth: int, alpha: float, beta: float, totalEvals: 0):
         result = board.isWinner()
 
         if depth == 0 or result != None:
             if result == BLACK:
-                return 100, board
+                return 100, board, totalEvals + 1
             elif result == WHITE:
-                return -100, board
+                return -100, board, totalEvals + 1
             elif result == "Draw":
                 # A draw is only good if you are losing. If you are winning you shouldn't be satisfied with a draw
                 if maximizeAI and self.evaluteBoard(board) > 0:
-                    return -1, board
+                    return -1, board, totalEvals + 1
                 elif not maximizeAI and self.evaluteBoard(board) < 0:
-                    return 1, board
+                    return 1, board, totalEvals + 1
                 else:
-                    return 0, board
+                    return 0, board, totalEvals + 1
 
-            return self.evaluteBoard(board), board
+            return self.evaluteBoard(board), board, totalEvals + 1
 
         if maximizeAI:
             maxEval = float('-inf')
             bestMove = None
             for move in self.getAllMoves(gameState, board, BLACK):
-                evaluation = self.minimax(gameState, move, False, depth-1)[0]
+                evaluation, board, totalEvals = self.minimax(
+                    gameState, move, False, depth-1, alpha, beta, totalEvals)
                 maxEval = max(maxEval, evaluation)
                 if maxEval == evaluation:
                     bestMove = move
+                alpha = max(alpha, evaluation)
+                if beta <= alpha:
+                    break
 
-            return maxEval, bestMove
+            return maxEval, bestMove, totalEvals
         else:
             minEval = float('inf')
             bestMove = None
             for move in self.getAllMoves(gameState, board, WHITE):
-                evaluation = self.minimax(gameState, move, True, depth-1)[0]
+                evaluation, board, totalEvals = self.minimax(
+                    gameState, move, True, depth-1, alpha, beta,  totalEvals)
                 minEval = min(minEval, evaluation)
                 if minEval == evaluation:
                     bestMove = move
+                beta = min(beta, evaluation)
+                if beta <= alpha:
+                    break
 
-            return minEval, bestMove
+            return minEval, bestMove, totalEvals
 
     def getAllMoves(self, gameState: Game, board: Board, player: tuple):
         moves = []
