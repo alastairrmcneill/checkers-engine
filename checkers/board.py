@@ -304,5 +304,15 @@ class Board():
                 pygame.draw.rect(win, BOARDLIGHT, (row*SQUARE_SIZE,
                                  col * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
+    def __hash__(self):
+        board_state = []
+        for row in self.board:
+            row_state = []
+            for square in row:
+                square_hash = hash(square) if square != 0 else -1
+                row_state.append(square_hash)
+            board_state.append(tuple(row_state))
+        return hash(tuple(board_state))
+
     def __str__(self) -> str:
         return f"""Black Pieces: {self.blackPieces},White Pieces: {self.whitePieces}"""

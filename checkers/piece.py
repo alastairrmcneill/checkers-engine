@@ -33,6 +33,9 @@ class Piece():
             win.blit(CROWN, (self.x - CROWN.get_width() //
                              2, self.y - CROWN.get_height()//2))
 
+    def __hash__(self) -> int:
+        return hash((self.color, self.isKing, self.row, self.col))
+
     def __str__(self) -> str:
         if self.color == WHITE:
             color = "White"
