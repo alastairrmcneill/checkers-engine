@@ -5,8 +5,10 @@ from checkers.constants import WHITE, BLACK
 
 from copy import deepcopy
 
+# Basic engine, no pruning, simple eval
 
-class Engine:
+
+class EngineV1:
     def __init__(self):
         pass
 

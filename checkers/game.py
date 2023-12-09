@@ -43,6 +43,7 @@ class Game():
 
     def isWinner(self):
         if self.numberOfValidMoves() == 0:
+
             if self.turn == WHITE:
                 return BLACK
             else:

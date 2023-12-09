@@ -105,6 +105,8 @@ class Board():
             return BLACK
 
         if self.checkThreePeat() or self.check40MoveRule()[0]:
+            print(f"3 Peat: {self.checkThreePeat()}")
+            print(f"40 Moves: {self.check40MoveRule()}")
             return "Draw"
 
         return None
