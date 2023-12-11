@@ -78,18 +78,12 @@ class Game():
                     return True
                 elif (self.isPartialMove(move)):
                     # Check if its a partial move
-
                     captures = self.getCapturedPiecesFromMove(move)
                     self.board.move(self.selected, row, col, captures)
                     self.removeInvalidRoutes(move)
                     self.jumping = True
                     return True
 
-                # self.board.move(self.selected, row, col)
-                # self.validMoves = {}
-                # self.changeTurns()
-                # self.selected = None
-                # return True
         else:
             return False
 

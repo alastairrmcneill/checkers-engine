@@ -6,9 +6,9 @@ from checkers.piece import Piece
 
 class Board():
     def __init__(self) -> None:
-        self.board: list[list[Piece]] = []
+        self.board: list[Piece] = []
         self.create_board()
-        self.history: list[list[list[Piece]]] = []
+        self.history: list[list[Piece]] = []
         self.whiteKings: int = 0
         self.blackKings: int = 0
         self.whitePieces: int = 12
@@ -16,33 +16,17 @@ class Board():
 
     def create_board(self):
         for row in range(ROWS):
-            self.board.append([])
             for col in range(COLS):
                 # self.board[row].append(0)  # comment out
                 if col % 2 == ((row + 1) % 2):
                     if row < 3:
-                        self.board[row].append(
+                        self.board.append(
                             Piece(row, col, BLACK))
                     elif row > 4:
-                        self.board[row].append(
+                        self.board.append(
                             Piece(row, col, WHITE))
                     else:
-                        self.board[row].append(0)
-                else:
-                    self.board[row].append(0)
-
-        # self.board[0][1] = Piece(0, 1, BLACK)
-        # self.board[0][3] = Piece(0, 3, BLACK)
-        # self.board[0][5] = Piece(0, 5, BLACK)
-        # self.board[1][6] = Piece(1, 6, BLACK)
-        # self.board[4][7] = Piece(4, 7, BLACK)
-        # self.board[5][0] = Piece(5, 0, BLACK)
-
-        # self.board[5][4] = Piece(5, 4, WHITE)
-        # self.board[6][5] = Piece(6, 5, WHITE)
-        # self.board[7][0] = Piece(7, 0, WHITE)
-        # self.board[7][6] = Piece(7, 4, WHITE)
-        # self.board[7][6] = Piece(7, 6, WHITE)
+                        self.board.append(0)
 
     def convertBoardToList(self):
         convertedBoard = []
@@ -63,7 +47,10 @@ class Board():
         return convertedBoard
 
     def move(self, piece: Piece, row: int, col: int, captures: list[Piece]):
+        print(f"Piece to move: {piece}")
+
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
+
         self.addToHistory()
         self.isWinner()
         piece.move(row, col)
@@ -82,7 +69,7 @@ class Board():
                 else:
                     self.blackKings += 1
 
-    def aiMove(self, board: list[list[Piece]]):
+    def aiMove(self, board: list):
         self.board = board
         self.addToHistory()
 
@@ -126,18 +113,53 @@ class Board():
         return None
 
     def getPiece(self, row: int, col: int) -> Piece or int:
-        return self.board[row][col]
+        pos = (row, col)
+        squares = {
+            (0,	1):	0,
+            (0,	3):	1,
+            (0,	5):	2,
+            (0,	7):	3,
+            (1,	0):	4,
+            (1,	2):	5,
+            (1,	4):	6,
+            (1,	6):	7,
+            (2,	1):	8,
+            (2,	3):	9,
+            (2,	5):	10,
+            (2,	7):	11,
+            (3,	0):	12,
+            (3,	2):	13,
+            (3,	4):	14,
+            (3,	6):	15,
+            (4,	1):	16,
+            (4,	3):	17,
+            (4,	5):	18,
+            (4,	7):	19,
+            (5,	0):	20,
+            (5,	2):	21,
+            (5,	4):	22,
+            (5,	6):	23,
+            (6,	1):	24,
+            (6,	3):	25,
+            (6,	5):	26,
+            (6,	7):	27,
+            (7,	0):	28,
+            (7,	2):	29,
+            (7,	4):	30,
+            (7,	6):	31, }
+
+        index = squares[pos]
+        return self.board[index]
 
     def getValidMoves(self, color: tuple) -> list:
         pseudoValidMoves = []
 
         # Loop through all pieces
-        for row in self.board:
-            for piece in row:
-                if piece != 0 and piece.color == color:
-                    # Append valid moves
-                    pseudoValidMoves.append(
-                        {"piece": piece, "moves": self.getPieceMoves(piece)})
+        for piece in self.board:
+            if piece != 0 and piece.color == color:
+                # Append valid moves
+                pseudoValidMoves.append(
+                    {"piece": piece, "moves": self.getPieceMoves(piece)})
 
         # If any move captures then remove all the ones that don't.
         pseudoValidMoves = self.filterMovesIfCaptureAvailable(pseudoValidMoves)
@@ -305,11 +327,9 @@ class Board():
 
     def draw(self, win: pygame.Surface):
         self.draw_squares(win)
-        for row in range(ROWS):
-            for col in range(COLS):
-                piece = self.board[row][col]
-                if piece != 0:
-                    piece.draw(win)
+        for piece in self.board:
+            if piece != 0:
+                piece.draw(win)
 
     def draw_squares(self, win: pygame.Surface):
         win.fill(BOARDDARK)

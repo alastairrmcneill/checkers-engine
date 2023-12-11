@@ -44,24 +44,24 @@ def main():
             pygame.quit()
             quit()
 
-        if game.turn == WHITE:
-            # value, new_board, totalEvals = engine1.minimax(
-            #     game, game.board, True, 3)
-            # value, new_board, totalEvals = engine3.minimax(
-            #     game, game.board, False, 4, float('-inf'), float('inf'), 0)
+        # if game.turn == WHITE:
+        #     # value, new_board, totalEvals = engine1.minimax(
+        #     #     game, game.board, True, 3)
+        #     # value, new_board, totalEvals = engine3.minimax(
+        #     #     game, game.board, False, 4, float('-inf'), float('inf'), 0)
 
-            value, new_board, totalEvals = engine5.findBestMove(
-                game, game.board, False)
-            game.aiMove(new_board)
-            game.draw()
-            pygame.time.delay(200)
+        #     value, new_board, totalEvals = engine5.findBestMove(
+        #         game, game.board, False)
+        #     game.aiMove(new_board)
+        #     game.draw()
+        #     pygame.time.delay(200)
 
-        if game.turn == BLACK:
-            value, new_board, totalEvals = engine7.findBestMove(
-                game, game.board, True)
-            game.aiMove(new_board)
-            game.draw()
-            pygame.time.delay(200)
+        # if game.turn == BLACK:
+        #     value, new_board, totalEvals = engine7.findBestMove(
+        #         game, game.board, True)
+        #     game.aiMove(new_board)
+        #     game.draw()
+        #     pygame.time.delay(200)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
