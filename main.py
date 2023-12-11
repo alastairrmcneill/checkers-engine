@@ -56,12 +56,12 @@ def main():
         #     game.draw()
         #     pygame.time.delay(200)
 
-        # if game.turn == BLACK:
-        #     value, new_board, totalEvals = engine7.findBestMove(
-        #         game, game.board, True)
-        #     game.aiMove(new_board)
-        #     game.draw()
-        #     pygame.time.delay(200)
+        if game.turn == BLACK:
+            value, new_board, totalEvals = engine7.findBestMove(
+                game, game.board, True)
+            game.aiMove(new_board)
+            game.draw()
+            pygame.time.delay(200)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

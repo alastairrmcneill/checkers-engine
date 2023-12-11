@@ -24,7 +24,9 @@ class Game():
         # If not then select the peice
         else:
             piece = self.board.getPiece(row, col)
-
+            if piece == None:
+                self.selected = None
+                return False
             if piece != 0 and piece.color == self.turn:
                 self.selected = piece
                 return True

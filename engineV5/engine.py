@@ -10,23 +10,23 @@ from copy import deepcopy
 
 class EngineV5:
     def __init__(self):
-        self.whiteMultiplier = [[0, 1, 0, 1, 0, 1, 0, 0.75],
-                                [0.75, 0, 1, 0, 1, 0, 1, 0],
-                                [0, 1, 0, 1.3, 0, 1.2, 0, 0.75],
-                                [0.75, 0, 1.2, 0, 1.3, 0, 1, 0],
-                                [0, 1.3, 0, 1.2, 0, 1.2, 0, 0.75],
-                                [0.75, 0, 1, 0, 1, 0, 1.3, 0],
-                                [0, 1, 0, 1, 0, 1, 0, 0.75],
-                                [0.75, 0, 1.1, 0, 1.1, 0, 1.1, 0]]
+        self.whiteMultiplier = [1, 1, 1, 0.75,
+                                0.75, 1, 1, 1,
+                                1, 1.3, 1.2, 0.75,
+                                0.75, 1.2, 1.3, 1,
+                                1.3, 1.2, 1.2, 0.75,
+                                0.75, 1, 1, 1.3,
+                                1, 1, 1, 0.75,
+                                0.75, 1.1, 1.1, 1.1]
 
-        self.blackMultiplier = [[0, 1.1, 0, 1.1, 0, 1.1, 0, 0.75],
-                                [0.75, 0, 1, 0, 1, 0, 1, 0],
-                                [0, 1, 0, 1.3, 0, 1.2, 0, 0.75],
-                                [0.75, 0, 1.2, 0, 1.3, 0, 1, 0],
-                                [0, 1.3, 0, 1.2, 0, 1.2, 0, 0.75],
-                                [0.75, 0, 1, 0, 1, 0, 1.3, 0],
-                                [0, 1, 0, 1, 0, 1, 0, 0.75],
-                                [0.75, 0, 1, 0, 1, 0, 1, 0]]
+        self.blackMultiplier = [1.1, 1.1, 1.1, 0.75,
+                                0.75, 1, 1, 1,
+                                1, 1.3, 1.2, 0.75,
+                                0.75, 1.2, 1.3, 1,
+                                1.3, 1.2, 1.2, 0.75,
+                                0.75, 1, 1, 1.3,
+                                1, 1, 1, 0.75,
+                                0.75, 1, 1, 1]
 
         self.transpositionTable = {}
 
@@ -122,22 +122,19 @@ class EngineV5:
 
     def evaluteBoard(self, tempBoard: Board) -> int:
         eval = 0
-        for i in range(ROWS):
-            for j in range(COLS):
-                piece = tempBoard.getPiece(i, j)
-                if piece != 0:
-
-                    if piece.color == WHITE:
-                        pieceScore = self.whiteMultiplier[i][j]
-                        if piece.isKing:
-                            eval -= 3*pieceScore
-                        else:
-                            eval -= pieceScore
-                    elif piece.color == BLACK:
-                        pieceScore = self.blackMultiplier[i][j]
-                        if piece.isKing:
-                            eval += 3*pieceScore
-                        else:
-                            eval += pieceScore
+        for i, piece in enumerate(tempBoard.board):
+            if piece != 0:
+                if piece.color == WHITE:
+                    pieceScore = self.whiteMultiplier[i]
+                    if piece.isKing:
+                        eval -= 3*pieceScore
+                    else:
+                        eval -= pieceScore
+                elif piece.color == BLACK:
+                    pieceScore = self.blackMultiplier[i]
+                    if piece.isKing:
+                        eval += 3*pieceScore
+                    else:
+                        eval += pieceScore
 
         return eval

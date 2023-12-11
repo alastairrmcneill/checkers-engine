@@ -30,32 +30,34 @@ class Board():
 
     def convertBoardToList(self):
         convertedBoard = []
-        for row in range(ROWS):
-            for col in range(COLS):
-                piece = self.getPiece(row, col)
-                if piece == 0:
-                    convertedBoard.append(0)
-                elif piece.color == WHITE:
-                    if piece.isKing:
-                        convertedBoard.append(10)
-                    convertedBoard.append(1)
-                elif piece.color == BLACK:
-                    convertedBoard.append(2)
-                    if piece.isKing:
-                        convertedBoard.append(20)
+
+        for piece in self.board:
+            if piece == 0:
+                convertedBoard.append(0)
+            elif piece.color == WHITE:
+                if piece.isKing:
+                    convertedBoard.append(10)
+                convertedBoard.append(1)
+            elif piece.color == BLACK:
+                convertedBoard.append(2)
+                if piece.isKing:
+                    convertedBoard.append(20)
 
         return convertedBoard
 
     def move(self, piece: Piece, row: int, col: int, captures: list[Piece]):
-        print(f"Piece to move: {piece}")
+        currentPieceIndex = self.getIndexFromRowCol(piece.row, piece.col)
+        futurePieceIndex = self.getIndexFromRowCol(row, col)
 
-        self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
+        self.board[currentPieceIndex], self.board[futurePieceIndex] = self.board[futurePieceIndex], self.board[currentPieceIndex]
 
         self.addToHistory()
         self.isWinner()
         piece.move(row, col)
         for capturedPiece in captures:
-            self.board[capturedPiece.row][capturedPiece.col] = 0
+            capturedIndex = self.getIndexFromRowCol(
+                capturedPiece.row, capturedPiece.col)
+            self.board[capturedIndex] = 0
             if capturedPiece != 0:
                 if capturedPiece.color == BLACK:
                     self.blackPieces -= 1
@@ -112,7 +114,7 @@ class Board():
 
         return None
 
-    def getPiece(self, row: int, col: int) -> Piece or int:
+    def getIndexFromRowCol(self, row: int, col: int) -> Piece or int:
         pos = (row, col)
         squares = {
             (0,	1):	0,
@@ -148,8 +150,14 @@ class Board():
             (7,	4):	30,
             (7,	6):	31, }
 
-        index = squares[pos]
-        return self.board[index]
+        return squares[pos]
+
+    def getPiece(self, row: int, col: int) -> Piece or int:
+        try:
+            index = self.getIndexFromRowCol(row, col)
+            return self.board[index]
+        except:
+            return None
 
     def getValidMoves(self, color: tuple) -> list:
         pseudoValidMoves = []
@@ -340,13 +348,14 @@ class Board():
 
     def __hash__(self):
         board_state = []
-        for row in self.board:
-            row_state = []
-            for square in row:
-                square_hash = hash(square) if square != 0 else -1
-                row_state.append(square_hash)
-            board_state.append(tuple(row_state))
+        for piece in self.board:
+            pieceHash = hash(piece) if piece != 0 else -1
+            board_state.append(pieceHash)
         return hash(tuple(board_state))
 
     def __str__(self) -> str:
-        return f"""Black Pieces: {self.blackPieces},White Pieces: {self.whitePieces}"""
+        returnString = f""
+        for piece in self.board:
+            returnString += f"{piece}"
+
+        return returnString
