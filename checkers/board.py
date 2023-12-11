@@ -18,6 +18,7 @@ class Board():
         for row in range(ROWS):
             self.board.append([])
             for col in range(COLS):
+                # self.board[row].append(0)  # comment out
                 if col % 2 == ((row + 1) % 2):
                     if row < 3:
                         self.board[row].append(
@@ -29,6 +30,19 @@ class Board():
                         self.board[row].append(0)
                 else:
                     self.board[row].append(0)
+
+        # self.board[0][1] = Piece(0, 1, BLACK)
+        # self.board[0][3] = Piece(0, 3, BLACK)
+        # self.board[0][5] = Piece(0, 5, BLACK)
+        # self.board[1][6] = Piece(1, 6, BLACK)
+        # self.board[4][7] = Piece(4, 7, BLACK)
+        # self.board[5][0] = Piece(5, 0, BLACK)
+
+        # self.board[5][4] = Piece(5, 4, WHITE)
+        # self.board[6][5] = Piece(6, 5, WHITE)
+        # self.board[7][0] = Piece(7, 0, WHITE)
+        # self.board[7][6] = Piece(7, 4, WHITE)
+        # self.board[7][6] = Piece(7, 6, WHITE)
 
     def convertBoardToList(self):
         convertedBoard = []

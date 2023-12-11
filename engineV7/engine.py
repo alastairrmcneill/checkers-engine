@@ -4,11 +4,12 @@ from checkers.piece import Piece
 from checkers.constants import WHITE, BLACK, ROWS, COLS
 
 from copy import deepcopy
+from datetime import datetime, timedelta
 
-# Engine V5 - Implement transposition tables
+# Engine V6 - Implement time based searching
 
 
-class EngineV5:
+class EngineV7:
     def __init__(self):
         self.whiteMultiplier = [[0, 1, 0, 1, 0, 1, 0, 0.75],
                                 [0.75, 0, 1, 0, 1, 0, 1, 0],
@@ -29,52 +30,88 @@ class EngineV5:
                                 [0.75, 0, 1, 0, 1, 0, 1, 0]]
 
         self.transpositionTable = {}
+        self.endTime = datetime.now()
 
     def findBestMove(self, gameState: Game, board: Board, maximizeAI: bool):
         self.transpositionTable = {}
+        timeLimit = 3
+        self.endTime = datetime.now() + timedelta(0, timeLimit)
 
-        eval, bestMove, totalEvals = self.minimax(
-            gameState, board, maximizeAI, 5, float('-inf'), float('inf'), 0)
-        print(f"V5 Boards evaluated: {totalEvals}")
-        print(f"V5 Board Eval: {eval}")
+        eval, bestMove, totalEvals = self.iterativeDeepening(
+            gameState, board, maximizeAI)
+
+        print(f"V7 Boards evaluated: {totalEvals}")
+        print(f"V7 Board Eval: {eval}")
+        return eval, bestMove, totalEvals
+
+    def iterativeDeepening(self, gameState: Game, board: Board, maximizeAI: bool):
+        depth = 1
+        totalEvals = 0
+        while not self.timeIsUp():
+            eval, bestMove, totalEvals = self.minimax(
+                gameState, board, maximizeAI, depth, float('-inf'), float('inf'), totalEvals)
+            depth += 1
+
         return eval, bestMove, totalEvals
 
     def minimax(self, gameState: Game, board: Board, maximizeAI: bool, depth: int, alpha: float, beta: float, totalEvals: int):
         boardHash = hash(board)
 
-        if boardHash in self.transpositionTable:
-            return self.transpositionTable[boardHash], board, totalEvals + 1
+        if boardHash in self.transpositionTable and self.transpositionTable[boardHash]["depth"] >= depth:
+            return self.transpositionTable[boardHash]["eval"], board, totalEvals + 1
 
         result = board.isWinner()
 
         if depth == 0 or result != None:
             if result == BLACK:
-                self.transpositionTable[boardHash] = 100
+                self.transpositionTable[boardHash] = {
+                    "eval": 100, "depth": depth, "bestMove": board}
                 return 100, board, totalEvals + 1
             elif result == WHITE:
-                self.transpositionTable[boardHash] = -100
+                self.transpositionTable[boardHash] = {
+                    "eval": -100, "depth": depth, "bestMove": board}
                 return -100, board, totalEvals + 1
             elif result == "Draw":
                 # A draw is only good if you are losing. If you are winning you shouldn't be satisfied with a draw
                 if maximizeAI and self.evaluteBoard(board) > 0:
-                    self.transpositionTable[boardHash] = -1
+                    self.transpositionTable[boardHash] = {
+                        "eval": -1, "depth": depth, "bestMove": board}
                     return -1, board, totalEvals + 1
                 elif not maximizeAI and self.evaluteBoard(board) < 0:
-                    self.transpositionTable[boardHash] = 1
+                    self.transpositionTable[boardHash] = {
+                        "eval": 1, "depth": depth, "bestMove": board}
                     return 1, board, totalEvals + 1
                 else:
-                    self.transpositionTable[boardHash] = 0
+                    self.transpositionTable[boardHash] = {
+                        "eval": 0, "depth": depth, "bestMove": board}
                     return 0, board, totalEvals + 1
 
             eval = self.evaluteBoard(board)
-            self.transpositionTable[boardHash] = eval
+            self.transpositionTable[boardHash] = {
+                "eval": eval, "depth": depth, "bestMove": board}
+
+            return eval, board, totalEvals + 1
+
+        if self.timeIsUp():
+            eval = self.evaluteBoard(board)
+            self.transpositionTable[boardHash] = {
+                "eval": eval, "depth": depth, "bestMove": board}
 
             return eval, board, totalEvals + 1
 
         if maximizeAI:
             maxEval = float('-inf')
             bestMove = None
-            for move in reversed(self.getAllMoves(gameState, board, BLACK)):
+            movesList = self.getAllMoves(gameState, board, BLACK)
+
+            if boardHash in self.transpositionTable and self.transpositionTable[boardHash]['bestMove'] in movesList:
+                # Move the best move to the front of the move list
+                movesList.remove(
+                    self.transpositionTable[boardHash]['bestMove'])
+                movesList.insert(
+                    0, self.transpositionTable[boardHash]['bestMove'])
+
+            for move in reversed(movesList):
                 evaluation, board, totalEvals = self.minimax(
                     gameState, move, False, depth-1, alpha, beta, totalEvals)
                 maxEval = max(maxEval, evaluation)
@@ -84,12 +121,22 @@ class EngineV5:
                 if beta <= alpha:
                     break
 
-            self.transpositionTable[boardHash] = maxEval
+            self.transpositionTable[boardHash] = {
+                "eval": maxEval, "depth": depth, "bestMove": bestMove}
             return maxEval, bestMove, totalEvals
         else:
             minEval = float('inf')
             bestMove = None
-            for move in self.getAllMoves(gameState, board, WHITE):
+            movesList = self.getAllMoves(gameState, board, WHITE)
+
+            if boardHash in self.transpositionTable and self.transpositionTable[boardHash]['bestMove'] in movesList:
+                # Move the best move to the front of the move list
+                movesList.remove(
+                    self.transpositionTable[boardHash]['bestMove'])
+                movesList.insert(
+                    0, self.transpositionTable[boardHash]['bestMove'])
+
+            for move in movesList:
                 evaluation, board, totalEvals = self.minimax(
                     gameState, move, True, depth-1, alpha, beta,  totalEvals)
                 minEval = min(minEval, evaluation)
@@ -99,8 +146,13 @@ class EngineV5:
                 if beta <= alpha:
                     break
 
-            self.transpositionTable[boardHash] = minEval
+            self.transpositionTable[boardHash] = {
+                "eval": minEval, "depth": depth, "bestMove": bestMove}
             return minEval, bestMove, totalEvals
+
+    def timeIsUp(self):
+        currentTime = datetime.now()
+        return currentTime > self.endTime
 
     def getAllMoves(self, gameState: Game, board: Board, player: tuple):
         moves = []
