@@ -9,6 +9,7 @@ from engineV4.engine import EngineV4
 from engineV5.engine import EngineV5
 from engineV6.engine import EngineV6
 from engineV7.engine import EngineV7
+from engineV8.engine import EngineV8
 
 
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
@@ -33,6 +34,7 @@ def main():
     engine5 = EngineV5()
     engine6 = EngineV6()
     engine7 = EngineV7()
+    engine8 = EngineV8()
 
     while run:
         clock.tick(30)
@@ -44,20 +46,20 @@ def main():
             pygame.quit()
             quit()
 
-        # if game.turn == WHITE:
-        #     # value, new_board, totalEvals = engine1.minimax(
-        #     #     game, game.board, True, 3)
-        #     # value, new_board, totalEvals = engine3.minimax(
-        #     #     game, game.board, False, 4, float('-inf'), float('inf'), 0)
+        if game.turn == WHITE:
+            # value, new_board, totalEvals = engine1.minimax(
+            #     game, game.board, True, 3)
+            # value, new_board, totalEvals = engine3.minimax(
+            #     game, game.board, False, 4, float('-inf'), float('inf'), 0)
 
-        #     value, new_board, totalEvals = engine5.findBestMove(
-        #         game, game.board, False)
-        #     game.aiMove(new_board)
-        #     game.draw()
-        #     pygame.time.delay(200)
+            value, new_board, totalEvals = engine7.findBestMove(
+                game, game.board, False)
+            game.aiMove(new_board)
+            game.draw()
+            pygame.time.delay(200)
 
         if game.turn == BLACK:
-            value, new_board, totalEvals = engine7.findBestMove(
+            value, new_board, totalEvals = engine8.findBestMove(
                 game, game.board, True)
             game.aiMove(new_board)
             game.draw()
